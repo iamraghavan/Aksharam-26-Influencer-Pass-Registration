@@ -1,0 +1,71 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f4f4f4; /* carbon-gray-10 */
+  --foreground: #161616; /* carbon-gray-100 */
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: 'IBM Plex Sans', sans-serif;
+  
+  /* Carbon Design System Colors */
+  --color-carbon-blue-50: #4589ff;
+  --color-carbon-blue-60: #0f62fe; /* Primary Interactive */
+  --color-carbon-blue-70: #0043ce; /* Hover Interactive */
+  --color-carbon-blue-80: #002d9c; /* Active Interactive */
+  
+  --color-carbon-gray-10: #f4f4f4; /* UI Background */
+  --color-carbon-gray-20: #e0e0e0; /* UI Subdued Border */
+  --color-carbon-gray-30: #c6c6c6; /* UI Border */
+  --color-carbon-gray-40: #a8a8a8;
+  --color-carbon-gray-50: #8d8d8d; /* Text Secondary */
+  --color-carbon-gray-60: #6f6f6f;
+  --color-carbon-gray-70: #525252;
+  --color-carbon-gray-80: #393939; /* UI Dark */
+  --color-carbon-gray-90: #262626;
+  --color-carbon-gray-100: #161616; /* Text Primary */
+
+  --color-carbon-danger-60: #da1e28;
+  --color-carbon-success-50: #24a148;
+  
+  /* Overrides for common UI components */
+  --color-primary: var(--color-carbon-blue-60);
+  --color-primary-hover: var(--color-carbon-blue-70);
+  --color-primary-foreground: #ffffff;
+  --color-border: var(--color-carbon-gray-30);
+  --color-input: var(--color-carbon-gray-20);
+  --color-card: #ffffff;
+  --color-card-foreground: var(--color-carbon-gray-100);
+  --color-muted: #e0e0e0;
+  --color-muted-foreground: var(--color-carbon-gray-60);
+
+  /* Carbon uses very sharp radii, usually 0 or small */
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: 'IBM Plex Sans', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* React International Phone Carbon Overrides */
+.react-international-phone-country-selector-dropdown {
+  width: 300px !important;
+  max-width: 90vw !important;
+  border-radius: 0 !important;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1) !important;
+  z-index: 50 !important;
+}
+
+.react-international-phone-country-selector-button {
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+}
