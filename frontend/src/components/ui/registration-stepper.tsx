@@ -1,5 +1,5 @@
 import * as React from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, Variants } from "framer-motion";
 import { CheckCircle2, Circle, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -20,12 +20,12 @@ interface RegistrationStepperProps {
   headerStatus: string;
 }
 
-const iconVariants = {
+const iconVariants: Variants = {
   hidden: { scale: 0, opacity: 0 },
   visible: { scale: 1, opacity: 1, transition: { type: "spring", stiffness: 400, damping: 20 } },
 };
 
-const contentVariants = {
+const contentVariants: Variants = {
   collapsed: { height: 0, opacity: 0 },
   expanded: { height: "auto", opacity: 1, transition: { duration: 0.4, ease: "easeInOut" } },
 };
