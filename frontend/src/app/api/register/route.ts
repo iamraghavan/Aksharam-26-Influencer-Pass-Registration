@@ -1,35 +1,28 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
 
-// Local file DB
-const DATA_FILE = path.join(process.cwd(), '..', 'data.json');
+export const runtime = 'edge';
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
 
-    // Ensure data.json exists in the parent directory
-    if (!fs.existsSync(DATA_FILE)) {
-      fs.writeFileSync(DATA_FILE, JSON.stringify([]));
-    }
+    // ⚠️ CLOUDFLARE EDGE WORKAROUND
+    // The Edge runtime does NOT support the Node.js 'fs' (file system) module.
+    // Local data.json writing will not work here. 
+    // We are temporarily logging the data so the build succeeds.
+    // We need to implement Cloudflare D1, KV, or Google Sheets here next.
 
-    // Read current data
-    const currentData = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
-
-    // Append new submission
     const entry = {
       id: Date.now().toString(),
       timestamp: new Date().toISOString(),
       ...body
     };
 
-    currentData.push(entry);
+    console.log("New Registration Received (Not Saved Yet):", entry);
 
-    // Save
-    fs.writeFileSync(DATA_FILE, JSON.stringify(currentData, null, 2));
+    // TODO: Insert DB saving logic here
 
-    return NextResponse.json({ success: true, message: 'Registration successful' });
+    return NextResponse.json({ success: true, message: 'Registration received (storage pending DB setup)' });
   } catch (error) {
     console.error('API Error:', error);
     return NextResponse.json(
