@@ -1,14 +1,20 @@
 import { NextResponse } from 'next/server';
+import fs from 'fs';
+import path from 'path';
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
 
-    // ⚠️ CLOUDFLARE EDGE WORKAROUND
-    // The Edge runtime does NOT support the Node.js 'fs' (file system) module.
-    // Local data.json writing will not work here. 
-    // We are temporarily logging the data so the build succeeds.
-    // We need to implement Cloudflare D1, KV, or Google Sheets here next.
+    const dataPath = path.join(process.cwd(), '..', 'data.json');
+    const internalDataPath = path.join(process.cwd(), 'data.json');
+
+    const targetPath = fs.existsSync(internalDataPath) ? internalDataPath : dataPath;
+    
+    let currentData = [];
+    if (fs.existsSync(targetPath)) {
+      currentData = JSON.parse(fs.readFileSync(targetPath, 'utf8'));
+    }
 
     const entry = {
       id: Date.now().toString(),
@@ -16,11 +22,12 @@ export async function POST(req: Request) {
       ...body
     };
 
-    console.log("New Registration Received (Not Saved Yet):", entry);
+    currentData.push(entry);
+    
+    fs.writeFileSync(targetPath, JSON.stringify(currentData, null, 2));
+    console.log("New Registration Saved locally!");
 
-    // TODO: Insert DB saving logic here
-
-    return NextResponse.json({ success: true, message: 'Registration received (storage pending DB setup)' });
+    return NextResponse.json({ success: true, message: 'Registration received' });
   } catch (error) {
     console.error('API Error:', error);
     return NextResponse.json(
@@ -29,4 +36,3 @@ export async function POST(req: Request) {
     );
   }
 }
-// 01
