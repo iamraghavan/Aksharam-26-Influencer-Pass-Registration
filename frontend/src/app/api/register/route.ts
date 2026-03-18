@@ -47,6 +47,17 @@ export async function POST(req: Request) {
       await doc.loadInfo(); 
       const sheet = doc.sheetsByIndex[0];
 
+      // Robust Self-Healing: If the user forgot headers, inject them automatically
+      try {
+        await sheet.loadHeaderRow();
+      } catch (headerError) {
+        console.log("Headers missing in Google Sheet. Auto-injecting now...");
+        await sheet.setHeaderRow([
+          'Timestamp', 'Name', 'Instagram ID', 'Followers', 'Branch', 
+          'College', 'City', 'Phone', 'WhatsApp'
+        ]);
+      }
+
       await sheet.addRow(entry);
       console.log("Successfully saved registration to Google Sheets!");
     } catch (gsError) {
