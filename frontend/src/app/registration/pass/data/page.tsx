@@ -43,13 +43,17 @@ export default async function AdminDataPage({
       id: index,
       timestamp: row.get('Timestamp'),
       name: row.get('Name'),
+      email: row.get('Email'),
       instagramId: row.get('Instagram ID'),
       followers: row.get('Followers'),
+      otherPlatforms: row.get('Other Platforms'),
+      category: row.get('Category'),
       branch: row.get('Branch'),
       college: row.get('College'),
       city: row.get('City'),
       phoneNumber: row.get('Phone'),
-      whatsappNumber: row.get('WhatsApp')
+      whatsappNumber: row.get('WhatsApp'),
+      passCount: row.get('Pass Count')
     }));
 
   } catch (err) {
@@ -93,8 +97,12 @@ export default async function AdminDataPage({
               <tr>
                 <th className="px-4 py-3 font-semibold">Timestamp</th>
                 <th className="px-4 py-3 font-semibold">Name</th>
+                <th className="px-4 py-3 font-semibold">Email</th>
+                <th className="px-4 py-3 font-semibold">Category</th>
+                <th className="px-4 py-3 font-semibold">Count</th>
                 <th className="px-4 py-3 font-semibold">Instagram ID</th>
                 <th className="px-4 py-3 font-semibold">Followers</th>
+                <th className="px-4 py-3 font-semibold">Other Platforms</th>
                 <th className="px-4 py-3 font-semibold">Branch / Year</th>
                 <th className="px-4 py-3 font-semibold">College</th>
                 <th className="px-4 py-3 font-semibold">City</th>
@@ -105,7 +113,7 @@ export default async function AdminDataPage({
             <tbody className="divide-y divide-[var(--color-carbon-gray-20)]">
               {registrations.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="px-4 py-8 text-center text-[var(--color-carbon-gray-60)]">
+                  <td colSpan={13} className="px-4 py-8 text-center text-[var(--color-carbon-gray-60)]">
                     No registrations found.
                   </td>
                 </tr>
@@ -116,14 +124,18 @@ export default async function AdminDataPage({
                       {new Date(reg.timestamp).toLocaleString()}
                     </td>
                     <td className="px-4 py-3 font-medium text-[var(--color-carbon-gray-100)]">{reg.name}</td>
+                    <td className="px-4 py-3 text-[var(--color-carbon-gray-70)]">{reg.email}</td>
+                    <td className="px-4 py-3 font-medium text-[var(--color-carbon-gray-80)]">{reg.category}</td>
+                    <td className="px-4 py-3 text-center font-bold text-[var(--color-carbon-gray-100)]">{reg.passCount}</td>
                     <td className="px-4 py-3 text-[var(--color-carbon-blue-60)]">
                       <a href={`https://instagram.com/${reg.instagramId?.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="hover:underline">
                         {reg.instagramId}
                       </a>
                     </td>
                     <td className="px-4 py-3">{reg.followers}</td>
-                    <td className="px-4 py-3 text-[var(--color-carbon-gray-70)]">{reg.branch} ({reg.year})</td>
-                    <td className="px-4 py-3 text-[var(--color-carbon-gray-70)]">{reg.college}</td>
+                    <td className="px-4 py-3 text-[var(--color-carbon-gray-70)] max-w-[200px] truncate" title={reg.otherPlatforms}>{reg.otherPlatforms}</td>
+                    <td className="px-4 py-3 text-[var(--color-carbon-gray-70)]">{reg.branch}</td>
+                    <td className="px-4 py-3 text-[var(--color-carbon-gray-70)] max-w-[200px] truncate" title={reg.college}>{reg.college}</td>
                     <td className="px-4 py-3">{reg.city}</td>
                     <td className="px-4 py-3 font-mono text-xs">{reg.phoneNumber}</td>
                     <td className="px-4 py-3 font-mono text-xs">{reg.whatsappNumber || reg.phoneNumber}</td>

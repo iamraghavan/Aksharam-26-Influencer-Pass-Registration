@@ -13,14 +13,18 @@ export async function POST(req: Request) {
 
     const entry = {
       Timestamp: timestamp,
-      Name: body.name || '',
-      'Instagram ID': body.instagramId || '',
+      Name: body.fullName || '',
+      Email: body.email || '',
+      'Instagram ID': body.instagram || '',
       Followers: body.followers || '',
+      'Other Platforms': body.otherPlatforms || '',
+      Category: body.category || '',
       Branch: body.branch ? `${body.branch} (${body.year || ''})` : '',
       College: body.college || '',
       City: body.city || '',
-      Phone: body.phoneNumber || '',
-      WhatsApp: body.whatsappNumber || body.phoneNumber || ''
+      Phone: body.phone || '',
+      WhatsApp: body.whatsapp || body.phone || '',
+      'Pass Count': body.passCount || ''
     };
 
     // 1. Save to Firebase Realtime Database
@@ -53,8 +57,9 @@ export async function POST(req: Request) {
       } catch (headerError) {
         console.log("Headers missing in Google Sheet. Auto-injecting now...");
         await sheet.setHeaderRow([
-          'Timestamp', 'Name', 'Instagram ID', 'Followers', 'Branch', 
-          'College', 'City', 'Phone', 'WhatsApp'
+          'Timestamp', 'Name', 'Email', 'Instagram ID', 'Followers', 
+          'Other Platforms', 'Category', 'Branch', 'College', 'City', 
+          'Phone', 'WhatsApp', 'Pass Count'
         ]);
       }
 
