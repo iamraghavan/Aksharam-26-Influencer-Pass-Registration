@@ -1,9 +1,8 @@
-import fs from 'fs';
-import path from 'path';
+import { GoogleSpreadsheet } from 'google-spreadsheet';
+import { JWT } from 'google-auth-library';
 
-export const dynamic = 'force-dynamic'; // Ensure real-time data fetching
+export const dynamic = 'force-dynamic';
 
-// Note: In Next.js 15+, searchParams is a Promise
 export default async function AdminDataPage({
   searchParams,
 }: {
@@ -26,21 +25,39 @@ export default async function AdminDataPage({
 
   let registrations: any[] = [];
   try {
-    // Read from data.json located outside frontend dir (or fallback to inside if not found)
-    const externalDataPath = path.join(process.cwd(), '..', 'data.json');
-    const internalDataPath = path.join(process.cwd(), 'data.json');
+    const serviceAccountAuth = new JWT({
+      email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+      key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+      scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+    });
+
+    const doc = new GoogleSpreadsheet(process.env.GOOGLE_SHEET_ID as string, serviceAccountAuth);
+    await doc.loadInfo(); 
+    const sheet = doc.sheetsByIndex[0];
     
-    if (fs.existsSync(externalDataPath)) {
-      registrations = JSON.parse(fs.readFileSync(externalDataPath, 'utf8'));
-    } else if (fs.existsSync(internalDataPath)) {
-      registrations = JSON.parse(fs.readFileSync(internalDataPath, 'utf8'));
-    }
+    // Fetch all rows
+    const rows = await sheet.getRows();
+    
+    // Map Spreadsheet rows back into the JSON structure expected by the table
+    registrations = rows.map((row, index) => ({
+      id: index,
+      timestamp: row.get('Timestamp'),
+      name: row.get('Name'),
+      instagramId: row.get('Instagram ID'),
+      followers: row.get('Followers'),
+      branch: row.get('Branch'),
+      college: row.get('College'),
+      city: row.get('City'),
+      phoneNumber: row.get('Phone'),
+      whatsappNumber: row.get('WhatsApp')
+    }));
+
   } catch (err) {
-    console.error('Failed to parse registration data', err);
+    console.error('Failed to parse registration data from Google Sheets', err);
   }
 
-  // Ensure newest first
-  registrations = registrations.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  // Ensure newest first (filtering out empty rows just in case)
+  registrations = registrations.filter(r => r.timestamp).sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
   return (
     <div className="min-h-screen bg-[var(--color-carbon-gray-10)] p-4 md:p-8">

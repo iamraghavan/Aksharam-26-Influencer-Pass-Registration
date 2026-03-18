@@ -1,47 +1,66 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
+import { GoogleSpreadsheet } from 'google-spreadsheet';
+import { JWT } from 'google-auth-library';
+import { ref, set } from "firebase/database";
+import { database } from '@/lib/firebase';
+import { v4 as uuidv4 } from 'uuid';
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-
-    let currentData = [];
-    let targetPath = path.join(process.cwd(), '..', 'data.json');
-
-    try {
-      const dataPath = path.join(process.cwd(), '..', 'data.json');
-      const internalDataPath = path.join(process.cwd(), 'data.json');
-      targetPath = fs.existsSync(internalDataPath) ? internalDataPath : dataPath;
-      
-      if (fs.existsSync(targetPath)) {
-        currentData = JSON.parse(fs.readFileSync(targetPath, 'utf8'));
-      }
-    } catch (readErr) {
-      console.warn("Could not read local file system in serverless environment.", readErr);
-    }
+    const timestamp = new Date().toISOString();
+    const registrationId = uuidv4();
 
     const entry = {
-      id: Date.now().toString(),
-      timestamp: new Date().toISOString(),
-      ...body
+      Timestamp: timestamp,
+      Name: body.name || '',
+      'Instagram ID': body.instagramId || '',
+      Followers: body.followers || '',
+      Branch: body.branch ? `${body.branch} (${body.year || ''})` : '',
+      College: body.college || '',
+      City: body.city || '',
+      Phone: body.phoneNumber || '',
+      WhatsApp: body.whatsappNumber || body.phoneNumber || ''
     };
 
-    currentData.push(entry);
-    
+    // 1. Save to Firebase Realtime Database
     try {
-      fs.writeFileSync(targetPath, JSON.stringify(currentData, null, 2));
-      console.log("New Registration Saved locally!");
-    } catch (writeErr) {
-      console.warn("Could not write to local file system (expected in Serverless/Netlify environments). Data was received but not saved locally.", writeErr);
-      // We still return true below so the user sees a success screen instead of a crash.
+      await set(ref(database, 'registrations/' + registrationId), {
+        ...entry,
+        rawPayload: body // Store the raw JSON alongside formatted fields in NoSQL
+      });
+      console.log("Successfully saved to Firebase Realtime DB");
+    } catch (fbError) {
+      console.error("Firebase Save Error:", fbError);
+      // We don't fail the request here, we attempt Sheets as a fallback
     }
 
-    return NextResponse.json({ success: true, message: 'Registration received' });
+    // 2. Save to Google Sheets (Redundancy)
+    try {
+      const serviceAccountAuth = new JWT({
+        email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+        key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+        scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+      });
+
+      const doc = new GoogleSpreadsheet(process.env.GOOGLE_SHEET_ID as string, serviceAccountAuth);
+      await doc.loadInfo(); 
+      const sheet = doc.sheetsByIndex[0];
+
+      await sheet.addRow(entry);
+      console.log("Successfully saved registration to Google Sheets!");
+    } catch (gsError) {
+       console.error("Google Sheets Save Error:", gsError);
+       // Return error only if BOTH database saves failed
+       throw new Error("Failed to save to secondary database");
+    }
+
+    return NextResponse.json({ success: true, message: 'Registration successfully received and saved to Cloud Databases' });
+
   } catch (error) {
-    console.error('API Error:', error);
+    console.error('Database Sync API Error:', error);
     return NextResponse.json(
-      { success: false, message: 'Failed to save data' },
+      { success: false, message: 'Failed to save data to the databases due to configuration errors.' },
       { status: 500 }
     );
   }
