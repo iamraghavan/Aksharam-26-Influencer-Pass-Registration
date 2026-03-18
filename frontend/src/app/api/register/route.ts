@@ -6,14 +6,19 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
 
-    const dataPath = path.join(process.cwd(), '..', 'data.json');
-    const internalDataPath = path.join(process.cwd(), 'data.json');
-
-    const targetPath = fs.existsSync(internalDataPath) ? internalDataPath : dataPath;
-    
     let currentData = [];
-    if (fs.existsSync(targetPath)) {
-      currentData = JSON.parse(fs.readFileSync(targetPath, 'utf8'));
+    let targetPath = path.join(process.cwd(), '..', 'data.json');
+
+    try {
+      const dataPath = path.join(process.cwd(), '..', 'data.json');
+      const internalDataPath = path.join(process.cwd(), 'data.json');
+      targetPath = fs.existsSync(internalDataPath) ? internalDataPath : dataPath;
+      
+      if (fs.existsSync(targetPath)) {
+        currentData = JSON.parse(fs.readFileSync(targetPath, 'utf8'));
+      }
+    } catch (readErr) {
+      console.warn("Could not read local file system in serverless environment.", readErr);
     }
 
     const entry = {
