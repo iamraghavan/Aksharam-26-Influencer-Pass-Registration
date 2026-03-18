@@ -146,7 +146,7 @@ export default function AksharamRegistration() {
               onChange={(phone) => handlePhoneChange("phone", phone)}
               inputClassName={inputCarbonClass}
               style={{ '--react-international-phone-border-color': 'transparent', '--react-international-phone-background-color': 'transparent', '--react-international-phone-text-color': 'var(--color-carbon-gray-100)' } as React.CSSProperties}
-              className="flex items-stretch"
+              className="flex items-stretch w-full"
               countrySelectorStyleProps={{
                 buttonClassName: "!bg-[var(--color-carbon-gray-10)] !border-none !border-b-2 !border-b-[var(--color-carbon-gray-40)] !rounded-none !h-[42.79px] !px-3",
               }}
@@ -174,7 +174,7 @@ export default function AksharamRegistration() {
                 value={formData.whatsapp}
                 onChange={(phone) => handlePhoneChange("whatsapp", phone)}
                 style={{ '--react-international-phone-border-color': 'transparent', '--react-international-phone-background-color': 'transparent', '--react-international-phone-text-color': 'var(--color-carbon-gray-100)' } as React.CSSProperties}
-                className="flex items-stretch"
+                className="flex items-stretch w-full"
                 countrySelectorStyleProps={{
                   buttonClassName: "!bg-[var(--color-carbon-gray-10)] !border-none !border-b-2 !border-b-[var(--color-carbon-gray-40)] !rounded-none !h-[42.79px] !px-3",
                 }}

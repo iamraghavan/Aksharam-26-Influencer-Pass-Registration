@@ -39,9 +39,9 @@ export const RegistrationStepper = ({
 }: RegistrationStepperProps) => {
 
   return (
-    <div className={cn("w-screen max-w-md mx-auto", className)}>
+    <div className={cn("w-full max-w-md mx-auto", className)}>
       <div className="border bg-card text-card-foreground shadow-carbon-sm">
-        <div className="flex flex-col space-y-1.5 p-6 border-b">
+        <div className="flex flex-col space-y-1.5 p-4 sm:p-6 border-b">
           <div className="flex items-center justify-between">
             <h3 className="font-semibold leading-none tracking-tight text-xl">{headerTitle}</h3>
             <span className="text-xs font-semibold text-[var(--color-carbon-blue-60)] bg-blue-50 px-3 py-1 border border-blue-200 uppercase tracking-wider">
@@ -59,7 +59,7 @@ export const RegistrationStepper = ({
 
               return (
                 <li key={step.title} className={cn("overflow-hidden border-b last:border-b-0 transition-colors", isActive ? "bg-white" : "bg-gray-50")}>
-                  <div className={cn("flex items-start gap-4 p-6 border-l-4", isActive ? "border-[var(--color-carbon-blue-60)]" : "border-transparent")}>
+                  <div className={cn("flex items-start gap-3 sm:gap-4 p-4 sm:p-6 border-l-4", isActive ? "border-[var(--color-carbon-blue-60)]" : "border-transparent")}>
                     <div className="flex flex-col items-center pt-1">
                       <div className="relative flex h-6 w-6 items-center justify-center">
                         <AnimatePresence>
