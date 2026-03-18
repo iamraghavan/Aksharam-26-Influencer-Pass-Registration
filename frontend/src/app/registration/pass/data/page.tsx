@@ -1,5 +1,6 @@
 import { GoogleSpreadsheet } from 'google-spreadsheet';
 import { JWT } from 'google-auth-library';
+import { revalidatePath } from 'next/cache';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,6 +11,29 @@ export default async function AdminDataPage({
 }) {
   const params = await searchParams;
   
+  async function deleteRow(formData: FormData) {
+    "use server";
+    const timestamp = formData.get("timestamp") as string;
+    const phone = formData.get("phone") as string;
+
+    const serviceAccountAuth = new JWT({
+      email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+      key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+      scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+    });
+    const doc = new GoogleSpreadsheet(process.env.GOOGLE_SHEET_ID as string, serviceAccountAuth);
+    await doc.loadInfo(); 
+    const sheet = doc.sheetsByIndex[0];
+    const rows = await sheet.getRows();
+    
+    // Attempt to locate the exact row based on unique attributes
+    const targetRow = rows.find(r => r.get('Timestamp') === timestamp && r.get('Phone') === phone);
+    if (targetRow) {
+      await targetRow.delete();
+      revalidatePath('/registration/pass/data');
+    }
+  }
+
   if (params.access !== 'raghavan') {
     return (
       <div className="min-h-screen bg-[var(--color-carbon-gray-10)] flex items-center justify-center p-4">
@@ -95,6 +119,7 @@ export default async function AdminDataPage({
           <table className="w-full text-left text-sm whitespace-nowrap">
             <thead className="bg-[var(--color-carbon-gray-20)] text-[var(--color-carbon-gray-90)] border-b border-[var(--color-carbon-gray-30)]">
               <tr>
+                <th className="px-4 py-3 font-semibold">Actions</th>
                 <th className="px-4 py-3 font-semibold">Timestamp</th>
                 <th className="px-4 py-3 font-semibold">Name</th>
                 <th className="px-4 py-3 font-semibold">Email</th>
@@ -113,13 +138,30 @@ export default async function AdminDataPage({
             <tbody className="divide-y divide-[var(--color-carbon-gray-20)]">
               {registrations.length === 0 ? (
                 <tr>
-                  <td colSpan={13} className="px-4 py-8 text-center text-[var(--color-carbon-gray-60)]">
+                  <td colSpan={14} className="px-4 py-8 text-center text-[var(--color-carbon-gray-60)]">
                     No registrations found.
                   </td>
                 </tr>
               ) : (
                 registrations.map((reg, index) => (
                   <tr key={reg.id || index} className="hover:bg-[var(--color-carbon-gray-10)] transition-colors">
+                    <td className="px-4 py-3 flex items-center gap-2">
+                       <a 
+                         href={`https://wa.me/${(reg.whatsappNumber || reg.phoneNumber)?.replace(/[^0-9]/g, '')}`} 
+                         target="_blank" 
+                         rel="noopener noreferrer" 
+                         className="bg-[#25D366] hover:bg-[#128C7E] text-white px-3 py-1.5 text-xs font-semibold shadow-sm transition-colors"
+                       >
+                         WhatsApp
+                       </a>
+                       <form action={deleteRow} className="inline-block">
+                         <input type="hidden" name="timestamp" value={reg.timestamp} />
+                         <input type="hidden" name="phone" value={reg.phoneNumber} />
+                         <button type="submit" className="bg-[var(--color-carbon-danger-60)] hover:bg-[var(--color-carbon-danger-70)] text-white px-3 py-1.5 text-xs font-medium transition-colors">
+                           Delete
+                         </button>
+                       </form>
+                    </td>
                     <td className="px-4 py-3 text-[var(--color-carbon-gray-70)]">
                       {new Date(reg.timestamp).toLocaleString()}
                     </td>
